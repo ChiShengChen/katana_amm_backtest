@@ -6,10 +6,12 @@
 
 - ✅ Uniswap V3 風格的集中流動性模擬
 - ✅ 支持 Mint、Burn、Swap 事件處理
-- ✅ **ATR 動態 Rebalancing 策略**（基於 Average True Range 自動調整 LP 區間）
+- ✅ **Omnis AI (ATR) 動態 Rebalancing 策略**
+- ✅ **Steer Finance 策略** (Classic, Elastic, Fluid)
+- ✅ **Charm Alpha Vault 策略** (被動再平衡)
 - ✅ 完整的績效分析（收益率、夏普比率、最大回撤等）
 - ✅ LP 特定指標（無常損失、手續費收入等）
-- ✅ 歷史價格和價值追蹤
+- ✅ 多策略比較與視覺化圖表
 - ✅ 自動導出 CSV 數據和圖表
 
 ## 項目結構
@@ -29,309 +31,295 @@ katana_backtest/
 │   ├── performance_analyzer.py        # 績效分析器
 │   ├── uniswap_v3_math.py             # Uniswap V3 數學計算
 │   ├── main.py                        # 主程序入口
-│   └── output/                        # 輸出目錄（自動生成）
-│       ├── metrics.csv                # 績效指標 CSV
-│       ├── price_history.csv          # 價格歷史 CSV
-│       ├── value_history.csv          # 價值歷史 CSV
-│       ├── backtest_price_history.png # 價格走勢圖
-│       ├── backtest_value_history.png # 價值走勢圖
-│       ├── backtest_return_distribution.png  # 收益分佈圖
-│       └── backtest_price_atr_range.png      # ATR 區間圖（使用 ATR 策略時）
-├── requirements.txt                   # 依賴列表
-├── README.md                          # 本文件
-├── QUICK_START.md                     # 快速開始指南
-├── ATR_STRATEGY.md                    # ATR 策略說明
-├── ATR_USAGE.md                       # ATR 使用指南
-├── SIMULATION_VS_REAL.md              # 模擬與實盤差異說明
-├── BUGFIX_SUMMARY.md                  # Bug 修復記錄
-└── run_example.sh                     # 示例運行腳本
+│   ├── strategies/                    # 策略模組
+│   │   ├── __init__.py
+│   │   ├── base_strategy.py           # 策略基類
+│   │   ├── uniswap_math.py            # V3 數學計算
+│   │   ├── charm_strategy.py          # Charm Alpha Vault 策略
+│   │   ├── steer_strategy.py          # Steer 策略 (Classic/Elastic/Fluid)
+│   │   └── strategy_backtest.py       # 策略比較回測框架
+│   └── output/                        # 輸出目錄
+│       ├── marketing/                 # 行銷素材
+│       └── all_compare/               # 所有策略比較
+├── requirements.txt
+├── README.md
+└── run_example.sh
 ```
 
 ## 安裝
 
-1. 確保 Python 3.8+ 已安裝
-
-2. 安裝依賴：
 ```bash
+# 1. 確保 Python 3.8+ 已安裝
+# 2. 安裝依賴
 pip install -r requirements.txt
 ```
 
-## 使用方法
+## 快速開始
 
-### 基本使用
+### 基本回測
 
 ```bash
-# 從 src 目錄運行
 cd src
 python main.py --data ../data/wbtc_usdc_pool_events.jsonl --capital 10000
 ```
 
-### 使用 ATR 動態 Rebalancing 策略
+### 使用 ATR 策略
 
 ```bash
-cd src
-python main.py \
-  --data ../data/wbtc_usdc_pool_events.jsonl \
-  --capital 10000 \
-  --use-atr \
-  --atr-period 14 \
-  --atr-multiplier 2.0 \
-  --rebalance-interval 180
-```
-
-### 命令行參數
-
-```bash
-python main.py [選項]
-
-基本選項：
-  --data PATH              數據文件路徑（默認：data/wbtc_usdc_pool_events.jsonl）
-  --capital FLOAT          初始資金，單位 USDC（默認：10000.0）
-  --start-block INT        起始區塊號（可選）
-  --end-block INT          結束區塊號（可選）
-  --start-timestamp INT    起始時間戳（可選）
-  --end-timestamp INT      結束時間戳（可選）
-
-LP 區間選項：
-  --tick-lower INT         LP 價格區間下界 tick（可選，自動計算）
-  --tick-upper INT         LP 價格區間上界 tick（可選，自動計算）
-  --price-range-pct FLOAT  價格範圍百分比（默認：0.10，即 ±10%）
-
-ATR 策略選項：
-  --use-atr                啟用 ATR 動態 rebalancing 策略
-  --atr-period INT         ATR 計算週期（默認：14）
-  --atr-multiplier FLOAT   ATR 倍數，用於計算價格區間（默認：2.0，即 ±2*ATR）
-  --rebalance-interval INT Rebalance 檢查間隔（秒，默認：180 = 3分鐘）
-
-輸出選項：
-  --output PATH            輸出報告文件路徑（可選）
-  --output-dir PATH        輸出目錄，用於 CSV、圖片等（默認：output）
-  --no-csv                 不導出 CSV 文件
-  --no-plots               不導出圖表
-  --export-json            導出 JSON 文件
-```
-
-### 使用示例
-
-```bash
-# 1. 基本回測（自動導出 CSV 和圖表到 output/ 目錄）
-cd src
-python main.py --data ../data/wbtc_usdc_pool_events.jsonl --capital 50000
-
-# 2. 使用 ATR 策略進行動態 rebalancing
 python main.py \
   --data ../data/wbtc_usdc_pool_events.jsonl \
   --capital 10000 \
   --use-atr \
   --atr-period 14 \
   --atr-multiplier 2.0
-
-# 3. 指定時間範圍
-python main.py \
-  --data ../data/wbtc_usdc_pool_events.jsonl \
-  --capital 10000 \
-  --start-timestamp 1752790702 \
-  --end-timestamp 1760000000
-
-# 4. 自定義 LP 區間
-python main.py \
-  --data ../data/wbtc_usdc_pool_events.jsonl \
-  --capital 10000 \
-  --price-range-pct 0.20  # ±20% 區間
-
-# 5. 保存文字報告並自定義輸出目錄
-python main.py \
-  --data ../data/wbtc_usdc_pool_events.jsonl \
-  --capital 10000 \
-  --output ../reports/backtest_report.txt \
-  --output-dir ../reports
 ```
 
-## ATR 策略說明
+### 多策略比較
 
-ATR (Average True Range) 策略是一種基於市場波動性的動態 LP 區間管理策略：
+```bash
+cd src
+python -m strategies.strategy_backtest ../data/wbtc_usdc_pool_events.jsonl 10000
+```
 
-1. **ATR 計算**：使用過去 N 個週期的價格數據計算平均真實波動幅度
-2. **區間設定**：LP 價格區間設定為 `當前價格 ± ATR * 倍數`
-3. **自動 Rebalance**：當價格接近區間邊界（距離邊界 < 20% 範圍寬度）時，自動調整區間
+---
 
-### 策略參數
+## 📊 支持的策略
 
-| 參數 | 說明 | 默認值 | 建議範圍 |
-|------|------|--------|----------|
-| `atr-period` | ATR 計算週期 | 14 | 7-21 |
-| `atr-multiplier` | ATR 倍數 | 2.0 | 1.5-3.0 |
-| `rebalance-interval` | 檢查間隔（秒） | 180 | 60-600 |
+### 1. Omnis AI (ATR Dynamic Range)
 
-### ATR 策略輸出
+**核心理念**: 使用 ATR 指標動態調整 LP 區間
 
-使用 ATR 策略時，會額外生成：
-- `backtest_price_atr_range.png`：價格走勢與 ATR 動態區間的可視化圖表
-- 包含 ATR 值、rebalance 次數等額外指標
+```
+ATR = Average True Range（平均真實波動幅度）
 
-## 作為 Python 模組使用
+區間設定:
+├─ Upper = 當前價格 + (ATR × 乘數)
+└─ Lower = 當前價格 - (ATR × 乘數)
+
+特點:
+✅ 動態適應市場波動
+✅ 下跌時自動減少曝險
+✅ 無協議費（自建策略）
+```
+
+**參數**:
+| 參數 | 說明 | 預設值 |
+|------|------|--------|
+| `atr_period` | ATR 計算週期 | 14 |
+| `atr_multiplier` | 區間寬度乘數 | 2.0 |
+| `rebalance_interval` | 最小再平衡間隔 | 180 秒 |
+
+---
+
+### 2. Charm Alpha Vault (Passive Rebalancing)
+
+**核心理念**: 完全被動再平衡，不執行 Swap
+
+```
+Base Order: 對稱區間，最大平衡流動性
+Limit Order: 多餘資產設置為限價單，等待市場成交
+
+特點:
+✅ 零 Swap 成本
+✅ 無滑點風險
+✅ 協議費僅 2%
+❌ 趨勢市場反應慢
+```
+
+**參數**:
+| 參數 | 說明 | 預設值 |
+|------|------|--------|
+| `base_threshold` | Base Order 寬度 | 600 ticks |
+| `limit_threshold` | Limit Order 寬度 | 1200 ticks |
+| `rebalance_interval` | 再平衡間隔 | 48 小時 |
+
+---
+
+### 3. Steer Classic (Fixed Width)
+
+**核心理念**: 固定區間寬度，價格觸發再平衡
+
+```
+固定區間: 600 ticks (~6%)
+觸發條件: 價格偏離中心 > 5%
+
+執行動作:
+1. 撤出流動性
+2. Swap 平衡資產
+3. 重新部署
+
+特點:
+✅ 邏輯簡單透明
+❌ 需要 Swap（有滑點）
+❌ 協議費 15%
+```
+
+---
+
+### 4. Steer Elastic (Bollinger Bands)
+
+**核心理念**: 基於布林通道動態調整區間
+
+```
+Upper = SMA + 2σ
+Lower = SMA - 2σ
+
+高波動 → 區間擴大
+低波動 → 區間收窄
+
+⚠️ 警告: 頻繁 Rebalance 導致高 Gas 成本
+```
+
+---
+
+## 📈 策略比較結果
+
+基於 BTC 下跌 20% 的市場環境:
+
+| 策略 | 收益率 | 最大回撤 | Rebalance | 評價 |
+|------|--------|----------|-----------|------|
+| 🏆 **Omnis AI (ATR)** | **-9.5%** | **-12.6%** | 37 | 最佳保護 |
+| HODL 50/50 | -9.9% | -12.5% | 0 | 基準線 |
+| Charm Alpha | -15.0% | -18.8% | 55 | 穩定但慢 |
+| Steer Classic | -19.3% | -22.4% | 44 | 跟隨市場 |
+| Pure BTC | -19.8% | -24.5% | 0 | 完全暴露 |
+| ❌ Steer Elastic | -69.6% | -70.0% | 200 | 過度交易 |
+
+詳細比較報告: `src/output/all_compare/README.md`
+
+---
+
+## 命令行參數
+
+```bash
+python main.py [選項]
+
+基本選項：
+  --data PATH              數據文件路徑
+  --capital FLOAT          初始資金 (USDC)
+  --start-timestamp INT    起始時間戳
+  --end-timestamp INT      結束時間戳
+
+LP 區間選項：
+  --tick-lower INT         LP 區間下界
+  --tick-upper INT         LP 區間上界
+  --price-range-pct FLOAT  價格範圍百分比（默認 10%）
+
+ATR 策略選項：
+  --use-atr                啟用 ATR 策略
+  --atr-period INT         ATR 週期（默認 14）
+  --atr-multiplier FLOAT   ATR 乘數（默認 2.0）
+  --rebalance-interval INT 再平衡間隔（秒）
+
+輸出選項：
+  --output-dir PATH        輸出目錄
+  --no-csv                 不導出 CSV
+  --no-plots               不導出圖表
+```
+
+---
+
+## Python API 使用
+
+### 單策略回測
 
 ```python
 from src.backtest_engine import BacktestEngine
-from src.performance_analyzer import PerformanceAnalyzer
-from src.output_generator import OutputGenerator
 
-# 創建回測引擎
 engine = BacktestEngine(
     data_file='data/wbtc_usdc_pool_events.jsonl',
     initial_capital=10000.0
 )
 
-# 執行回測（使用 ATR 策略）
 metrics = engine.run_backtest(
-    start_timestamp=1752790702,
-    end_timestamp=1760000000,
     use_atr_strategy=True,
     atr_period=14,
-    atr_multiplier=2.0,
-    rebalance_interval=180
-)
-
-# 分析結果
-analyzer = PerformanceAnalyzer()
-report = analyzer.generate_report(metrics)
-print(report)
-
-# 導出數據
-output_gen = OutputGenerator(output_dir='output')
-output_gen.export_value_history_csv(engine.get_value_history())
-output_gen.export_price_history_csv(engine.get_price_history())
-output_gen.export_plots(
-    engine.get_value_history(),
-    engine.get_price_history(),
-    metrics
+    atr_multiplier=2.0
 )
 ```
 
-## 數據格式
+### 多策略比較
 
-輸入數據應為 JSONL 格式，每行一個 JSON 對象，包含以下事件類型：
+```python
+from strategies import CharmAlphaVaultStrategy, SteerClassicStrategy
+from strategies.strategy_backtest import StrategyBacktester, BacktestConfig
+from decimal import Decimal
 
-### Mint 事件
-```json
-{
-  "eventType": "Mint",
-  "blockNumber": 6045392,
-  "blockTimestamp": 1752790702,
-  "transactionHash": "...",
-  "owner": "0x...",
-  "tickLower": 65940,
-  "tickUpper": 76010,
-  "liquidity": 48887979,
-  "amount0": 313043,
-  "amount1": 378146271,
-  "amount0_wbtc": 0.00313043,
-  "amount1_usdc": 378.146271
-}
+config = BacktestConfig(
+    initial_amount0=Decimal('0.05'),
+    initial_amount1=Decimal('5000'),
+    pool_fee=3000
+)
+
+backtester = StrategyBacktester(config)
+backtester.load_tick_data("../data/wbtc_usdc_pool_events.jsonl")
+
+# 創建策略
+charm = CharmAlphaVaultStrategy(base_threshold=600)
+steer = SteerClassicStrategy(position_width_ticks=600)
+
+# 運行回測
+charm_result = backtester.run_backtest(charm)
+steer_result = backtester.run_backtest(steer)
+
+print(f"Charm Return: {charm_result.total_return_pct:.2f}%")
+print(f"Steer Return: {steer_result.total_return_pct:.2f}%")
 ```
 
-### Burn 事件
-```json
-{
-  "eventType": "Burn",
-  "blockNumber": 6045392,
-  "blockTimestamp": 1752790702,
-  "owner": "0x...",
-  "tickLower": 65940,
-  "tickUpper": 76010,
-  "liquidity": 48887979
-}
-```
+---
 
-### Swap 事件
-```json
-{
-  "eventType": "Swap",
-  "blockNumber": 6049908,
-  "blockTimestamp": 1752790702,
-  "amount0": 30370,
-  "amount1": -36566073,
-  "sqrtPriceX96": 2745620485994069963109933671105,
-  "price": 120094.14807813264,
-  "liquidity": 340723611,
-  "tick": 70912
-}
-```
+## 輸出文件
+
+| 目錄 | 文件 | 說明 |
+|------|------|------|
+| `output/` | `metrics.csv` | 績效指標 |
+| | `price_history.csv` | 價格歷史 |
+| | `value_history.csv` | 價值歷史 |
+| | `backtest_*.png` | 各類圖表 |
+| `output/all_compare/` | `strategy_comparison_value.png` | 策略價值對比 |
+| | `drawdown_comparison.png` | 回撤曲線 |
+| | `crash_comparison_bar.png` | 崩盤損失對比 |
+| | `README.md` | 詳細策略說明 |
+| `output/marketing/` | 各類行銷素材圖表 | |
+
+---
 
 ## 績效指標說明
 
 ### 基本指標
-- **總收益率**：整個回測期間的總收益率
-- **年化收益率**：按年化計算的收益率
-- **最大回撤**：從峰值到谷值的最大跌幅
-- **夏普比率**：風險調整後的收益指標
-- **波動率**：收益率的年化標準差
+- **總收益率**: 回測期間總收益
+- **年化收益率**: 按年計算的收益率
+- **最大回撤**: 峰值到谷值的最大跌幅
+- **夏普比率**: 風險調整後收益
 
 ### LP 特定指標
-- **總手續費收入**：累積的手續費收入（USDC）
-- **無常損失 (IL)**：由於價格變化導致的損失百分比（相對於 HODL）
-- **流動性效率**：流動性使用效率指標
+- **手續費收入**: 累積的交易手續費
+- **無常損失 (IL)**: 相對於 HODL 的損失
+- **區間內時間**: 價格在 LP 區間內的時間比例
 
-### ATR 策略指標
-- **ATR 值**：當前計算的 ATR 值
-- **Rebalance 次數**：策略調整區間的次數
-- **區間覆蓋率**：價格在 LP 區間內的時間比例
+---
 
-## 輸出文件說明
+## ⚠️ 注意事項
 
-| 文件 | 說明 |
-|------|------|
-| `metrics.csv` | 所有績效指標的 CSV 格式 |
-| `price_history.csv` | 每個時間點的價格記錄 |
-| `value_history.csv` | 每個時間點的組合價值記錄 |
-| `backtest_price_history.png` | 價格走勢圖 |
-| `backtest_value_history.png` | 組合價值走勢圖 |
-| `backtest_return_distribution.png` | 收益分佈直方圖 |
-| `backtest_price_atr_range.png` | 價格與 ATR 動態區間圖（ATR 策略專用） |
+本系統為模擬系統，與實盤存在差異：
 
-## 注意事項
-
-⚠️ **重要**：本系統是模擬系統，與真實實盤存在差異。請參考 `SIMULATION_VS_REAL.md` 了解詳細差異。
-
-主要限制：
-- 未考慮 Gas 費用
+- Gas 費用為估算值
 - 手續費計算基於簡化模型
-- 未模擬滑點和 MEV 攻擊
+- 未完全模擬滑點和 MEV
 - 假設完美執行時機
-- Rebalance 成本未完全計入
 
-## 開發
+詳見 `SIMULATION_VS_REAL.md`
 
-### 運行測試
-
-```bash
-# 運行基本回測測試
-python test_backtest.py
-
-# 檢查代碼語法
-python -m py_compile src/*.py
-```
-
-### 模組說明
-
-| 模組 | 說明 |
-|------|------|
-| `amm_simulator.py` | 核心 AMM 邏輯，包含流動性計算、手續費分配 |
-| `atr_strategy.py` | ATR 策略實現，動態 LP 區間計算 |
-| `backtest_engine.py` | 回測流程控制，事件處理 |
-| `event_processor.py` | JSONL 數據解析和事件處理 |
-| `output_generator.py` | CSV、JSON、圖表生成 |
-| `performance_analyzer.py` | 績效指標計算和報告生成 |
-| `uniswap_v3_math.py` | Uniswap V3 數學公式實現 |
+---
 
 ## 相關文檔
 
 - [快速開始](QUICK_START.md)
 - [ATR 策略詳解](ATR_STRATEGY.md)
-- [ATR 使用指南](ATR_USAGE.md)
 - [模擬與實盤差異](SIMULATION_VS_REAL.md)
-- [回測方法論](BACKTEST_METHODOLOGY.md)
-- [Bug 修復記錄](BUGFIX_SUMMARY.md)
+- [策略比較報告](src/output/all_compare/README.md)
+
+---
 
 ## 許可證
 
@@ -340,7 +328,3 @@ MIT License
 ## 貢獻
 
 歡迎提交 Issue 和 Pull Request！
-
-## 聯繫
-
-如有問題或建議，請開 Issue。
