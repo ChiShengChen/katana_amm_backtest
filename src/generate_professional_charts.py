@@ -7,7 +7,7 @@
 import os
 import sys
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
 import json
 import csv
@@ -106,6 +106,13 @@ def generate_professional_charts(output_dir: str = "output/all_compare"):
     initial_capital = 10000
     first_price = price_history[0][1]
     last_price = price_history[-1][1]
+    
+    # 在 Omnis AI 歷史開頭插入 $10,000 起始點
+    if omnis_history and omnis_history[0][1] != initial_capital:
+        # 使用第一筆資料前1秒作為起始時間
+        start_time = omnis_history[0][0] - timedelta(seconds=1)
+        omnis_history.insert(0, (start_time, initial_capital))
+        print(f"  已插入 $10,000 起始點")
     
     initial_btc = (initial_capital / 2) / first_price
     initial_usdc = initial_capital / 2
