@@ -1,0 +1,5 @@
+Strategy,Final Value,Total Return %,Annual Return %,Max Drawdown %,Sharpe Ratio,Fees Earned,Net Fees,Rebalances,Gas Cost,Swap Cost,IL %,Time in Range %
+Charm Alpha Vault (被動),"$5,291.00",-51.92%,-89.17%,99.31%,1.63,$0.00,$0.00,55,"$1,650.00",$0.00,-46.04%,100.0%
+Steer Classic (固定寬度),$110.05,-99.00%,-100.00%,100.00%,1.63,$0.00,$0.00,44,"$1,320.00",$12.95,-98.88%,100.0%
+Steer Elastic (Bollinger),$110.05,-99.00%,-100.00%,100.00%,3.40,$0.00,$0.00,304,"$9,120.00",$11.11,-98.88%,98.4%
+Steer Fluid (三態),"$2,568.00",-76.66%,-98.79%,99.69%,3.50,$0.00,$0.00,48,"$1,440.00",$0.00,-73.81%,100.0%
