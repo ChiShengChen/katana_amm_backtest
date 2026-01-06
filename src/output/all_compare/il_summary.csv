@@ -1,0 +1,5 @@
+strategy,final_il_pct,max_il_pct,mean_il_pct,min_il_pct,std_il_pct
+Charm Alpha Vault,-40.8178,0.1300,-43.2304,-50.8735,8.8555
+Steer Classic (±300 ticks),-99.9897,0.1300,-95.6584,-99.9898,9.5772
+Steer Elastic (BB 2.0σ),-98.7893,0.1300,-76.1790,-98.7893,38.3974
+Omnis AI (ATR),-6.3405,-3.5225,-10.9172,-18.0280,3.1137

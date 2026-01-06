@@ -1,0 +1,7 @@
+strategy,final_value_usdc,total_return_pct,max_drawdown_pct,rebalance_count,gas_cost_usdc,risk_level
+Omnis AI (ATR),9049,-9.5,12.6,37,1110,Low
+HODL 50/50,9010,-9.9,12.5,0,0,Low
+Charm Alpha,8500,-15.0,18.8,10,300,Low
+Steer Classic,8069,-19.3,22.4,9,270,Medium
+Pure BTC,8020,-19.8,24.5,0,0,Medium
+Steer Elastic,3040,-69.6,70.0,200,6000,High
